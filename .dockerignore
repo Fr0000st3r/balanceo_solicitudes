@@ -1,0 +1,13 @@
+/vendor
+/.run
+/node_modules
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/.env
+/.phpunit.result.cache
+/Dockerfile
+/.dockerignore
+/.git
