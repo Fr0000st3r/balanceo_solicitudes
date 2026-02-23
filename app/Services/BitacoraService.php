@@ -11,7 +11,6 @@ class BitacoraService
     {
         $accionRow = Accion::where('descripcion', $accion)->where('activo', 1)->first();
 
-        // si no existe la acción, no rompemos el flujo
         $cveAccion = $accionRow?->cve_accion ?? 0;
 
         Bitacora::create([

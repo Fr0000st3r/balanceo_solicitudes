@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class ReportesController extends Controller
 {
-    // GET /api/reportes/solicitudes-por-usuario?anio=2026&activo=1
     public function solicitudesPorUsuario(Request $request)
     {
         $anio = $request->filled('anio') ? (int) $request->query('anio') : null;
@@ -25,13 +24,11 @@ class ReportesController extends Controller
             $q->where('activo', $activo);
         }
 
-        // Conteo por usuario asignado
         $rows = $q->select('id_Usuario_Asignado', DB::raw('COUNT(*) as total'))
             ->groupBy('id_Usuario_Asignado')
             ->orderByDesc('total')
             ->get();
 
-        // Traer nombres de usuarios para mostrar bonito
         $usuarios = Usuario::whereIn('id_usuario', $rows->pluck('id_Usuario_Asignado'))
             ->get(['id_usuario', 'nombre', 'paterno', 'materno', 'login'])
             ->keyBy('id_usuario');
@@ -56,7 +53,6 @@ class ReportesController extends Controller
         ]);
     }
 
-    // GET /api/reportes/solicitudes-por-usuario/{idUsuario}?per_page=20&anio=2026&activo=1
     public function detalleSolicitudesPorUsuario(Request $request, int $idUsuario)
     {
         $perPage = (int) $request->query('per_page', 20);
@@ -65,7 +61,6 @@ class ReportesController extends Controller
         $anio = $request->filled('anio') ? (int) $request->query('anio') : null;
         $activo = $request->filled('activo') ? (int) $request->query('activo') : null;
 
-        // valida que exista el usuario
         $usuario = Usuario::findOrFail($idUsuario);
 
         $q = Solicitud::where('id_Usuario_Asignado', $idUsuario);
@@ -134,7 +129,6 @@ class ReportesController extends Controller
             . 'anio=' . ($anio ?? 'todos') . ' | '
             . 'activo=' . ($activo === null ? 'todos' : $activo);
 
-        // Construcción HTML simple (sin Blade para ir rápido)
         $html = '<!doctype html><html lang="es"><head><meta charset="utf-8">';
         $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
         $html .= '<title>' . e($titulo) . '</title>';
@@ -171,7 +165,6 @@ class ReportesController extends Controller
 
         $html .= '</tbody></table></body></html>';
 
-        // Para que el navegador lo trate como archivo descargable:
         $filename = 'reporte_solicitudes_por_usuario'
             . ($anio ? "_{$anio}" : '')
             . ($activo !== null ? "_activo{$activo}" : '')
@@ -220,10 +213,8 @@ class ReportesController extends Controller
         return response()->stream(function () use ($rows, $usuarios) {
             $out = fopen('php://output', 'w');
 
-            // (Opcional) BOM para que Excel respete acentos en UTF-8
             fwrite($out, "\xEF\xBB\xBF");
 
-            // Encabezados CSV
             fputcsv($out, ['id_usuario', 'login', 'nombre_completo', 'total_solicitudes']);
 
             foreach ($rows as $r) {

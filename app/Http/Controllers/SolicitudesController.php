@@ -155,11 +155,10 @@ class SolicitudesController extends Controller
     public function index(Request $request)
     {
         $perPage = (int) $request->query('per_page', 20);
-        $perPage = max(1, min($perPage, 100)); // límite sano
+        $perPage = max(1, min($perPage, 100));
 
         $q = Solicitud::query();
 
-        // Filtros opcionales
         if ($request->filled('activo')) {
             $q->where('activo', (int) $request->query('activo'));
         }
@@ -184,20 +183,12 @@ class SolicitudesController extends Controller
 
         $q->orderByDesc('fecha_Solicitud');
 
-        // (Opcional) Bitácora de consulta — usa operador si ya lo tienes
-        // $operadorId = (int) $request->header('X-User-Id', 1);
-        // BitacoraService::log($operadorId, 'CONSULTAR_SOLICITUDES', 'Consultó listado de solicitudes');
-
         return $q->paginate($perPage);
     }
 
     public function show(Request $request, int $id)
     {
         $solicitud = Solicitud::findOrFail($id);
-
-        // (Opcional) Bitácora
-        // $operadorId = (int) $request->header('X-User-Id', 1);
-        // BitacoraService::log($operadorId, 'CONSULTAR_SOLICITUD', "Consultó solicitud {$id}");
 
         return response()->json($solicitud);
     }

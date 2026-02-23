@@ -15,17 +15,15 @@ class SessionTimeout
             return response()->json(['message' => 'No autenticado'], 401);
 
         $key = "last_activity_user_{$userId}";
-        $last = Cache::get($key); // int timestamp
+        $last = Cache::get($key);
 
         $now = time();
-        $ttl = 60; // en prod: 300
+        $ttl = 60;
 
-        // Si no hay registro en caché, es que ya expiró o no ha hecho login
         if (!$last) {
             return response()->json(['message' => 'Sesión expirada o no iniciada'], 401);
         }
 
-        // Comprobación manual de tiempo por si el driver de caché tarda en limpiar
         if (($now - $last) >= $ttl) {
             Cache::forget($key);
             return response()->json(['message' => 'Sesión expirada por inactividad'], 401);

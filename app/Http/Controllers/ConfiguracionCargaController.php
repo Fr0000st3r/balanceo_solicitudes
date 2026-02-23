@@ -26,7 +26,6 @@ class ConfiguracionCargaController extends Controller
 
         $q->orderByDesc('anio')->orderByDesc('id_Configuracion_Carga');
 
-        // Bitácora (operador)
         $operadorId = (int) $request->header('X-User-Id', 0);
         if ($operadorId) {
             BitacoraService::log($operadorId, 'CONFIGURACION_CARGA', 'Consultó configuración de carga');
@@ -45,10 +44,6 @@ class ConfiguracionCargaController extends Controller
         ]);
 
         $data['activo'] = $data['activo'] ?? 1;
-
-        // (Opcional) evitar duplicados por año
-        // si quieres 1 config activa por año, desactiva las anteriores del mismo año:
-        // ConfiguracionCarga::where('anio', $data['anio'])->update(['activo' => 0]);
 
         $config = ConfiguracionCarga::create($data);
 
@@ -101,7 +96,6 @@ class ConfiguracionCargaController extends Controller
         ]);
     }
 
-    // Baja lógica: activo = 0 (mejor que delete real)
     public function destroy(Request $request, int $id)
     {
         $config = ConfiguracionCarga::findOrFail($id);
