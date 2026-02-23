@@ -1,59 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Balanceo de Solicitudes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto es una API REST desarrollada en Laravel para la gestión y balanceo de solicitudes de usuarios, incluyendo control de carga, reportes, bitácora de movimientos y seguridad por timeout de sesión.
 
-## About Laravel
+## 🚀 Características
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Autenticación**: Login simple con control de inactividad de sesión (60 segundos).
+- **Balanceo Automático**: Asignación de solicitudes al usuario con menor carga de trabajo en el año corriente.
+- **Gestión de Solicitudes**: CRUD completo para solicitudes con opción de cancelación.
+- **Reportes**: Generación de reportes de carga por usuario en formatos JSON, HTML y CSV.
+- **Bitácora**: Registro automático de acciones importantes (Creación, Cancelación, Login, etc.).
+- **Middleware Personalizado**: Control de sesión mediante headers personalizados (`X-User-Id`).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Requisitos Técnicos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- Base de Datos (MySQL/SQLite)
+- Laravel 11.x
 
-## Learning Laravel
+## 🏁 Instalación
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+1. Clonar el repositorio:
+   ```bash
+   git clone https://github.com/Fr0000st3r/balanceo_solicitudes.git
+   ```
+2. Instalar dependencias:
+   ```bash
+   composer install
+   ```
+3. Configurar el archivo `.env`:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+4. Ejecutar migraciones y seeders:
+   ```bash
+   php artisan migrate --seed
+   ```
+5. Iniciar el servidor:
+   ```bash
+   php artisan serve
+6. Importar la colección de Postman incluida en el proyecto: `Balanceo_Solicitudes.postman_collection.json`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Postman
+Se incluye una colección de Postman en la raíz del proyecto para facilitar las pruebas de los endpoints. 
+- Asegúrate de tener el servidor corriendo (`php artisan serve`).
+- La colección usa una variable global `{{base_url}}` configurada por defecto en `http://localhost:8000`.
+- Incluye ejemplos de cuerpos JSON para las peticiones POST y PUT.
 
-## Laravel Sponsors
+## 📖 Documentación de la API
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🔐 Autenticación
+Todas las rutas (excepto login) requieren el header **`X-User-Id`** con el ID del usuario tras el login.
 
-### Premium Partners
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `POST` | `/api/login` | Inicia sesión y devuelve el `id_usuario`. |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Cuerpo del Login:**
+```json
+{
+    "login": "usuario1",
+    "password": "password"
+}
+```
 
-## Contributing
+### 📋 Solicitudes
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `POST` | `/api/solicitudes` | Crea una solicitud y la asigna automáticamente. |
+| `GET` | `/api/solicitudes` | Lista todas las solicitudes (Paginado). |
+| `GET` | `/api/solicitudes/{id}` | Detalle de una solicitud específica. |
+| `PUT` | `/api/solicitudes/{id}/cancelar` | Cancela una solicitud y libera carga al usuario. |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 📊 Reportes
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/reportes/solicitudes-por-usuario` | Resumen de carga por usuario. |
+| `GET` | `/api/reportes/solicitudes-por-usuario/export/html` | Descarga reporte en HTML. |
+| `GET` | `/api/reportes/solicitudes-por-usuario/export/csv` | Descarga reporte en CSV. |
 
-## Code of Conduct
+### ⚙️ Configuración de Carga
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/configuracion-carga` | Lista las reglas de configuración. |
+| `POST` | `/api/configuracion-carga` | Crea una nueva regla de proporción/diferencia. |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🛡️ Seguridad (Timeout)
+La API implementa un Middleware de **Session Timeout**. 
+- Si no hay actividad durante **60 segundos**, la sesión expira.
+- El tiempo se renueva automáticamente con cada petición exitosa.
+- Se utiliza el driver de `Cache` para el control de estos tiempos.
 
-## Security Vulnerabilities
+### ⚙️ Ajuste de Tiempo de Sesión
+Para modificar el tiempo de inactividad permitido (actualmente 60 segundos), se debe actualizar el valor de la variable `$ttl` en los siguientes archivos:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1.  **Middleware**: `app/Http/Middleware/SessionTimeout.php`
+    ```php
+    $ttl = 60; // Cambiar por el tiempo deseado en segundos
+    ```
+2.  **Controlador de Autenticación**: `app/Http/Controllers/AuthController.php`
+    ```php
+    Cache::put("...", time(), 60); // Cambiar el último parámetro
+    ```
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📝 Bitácora
+Cada acción relevante se registra en la tabla `tblbitacoras` mediante el `BitacoraService`, guardando el usuario, la acción, la fecha y el detalle del movimiento.
